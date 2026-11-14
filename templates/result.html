@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Medicinal Plant Chatbot</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-900 text-white">
+
+  <!-- Navbar -->
+  <header class="bg-black py-4 shadow-lg bg-opacity-70">
+    <div class="container mx-auto flex justify-between items-center px-6">
+      <h1 class="text-xl font-bold text-blue-400">Medicinal Plant Classification</h1>
+      <nav>
+        <ul class="flex space-x-6">
+          <li><a href="/" class="hover:text-blue-400">Home</a></li>
+          <li><a href="/" class="hover:text-blue-400">Classifier</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  
+  <section class="bg-gray-800 py-10 px-6">
+    <div class="max-w-4xl mx-auto bg-gray-900 rounded-lg shadow-lg p-8">
+      
+      <div id="plantInfo" class="text-center mb-6">
+        <h2 class="text-2xl font-semibold text-white">Plant Identified: 
+          <span class="text-green-400">{{ prediction }}</span>
+        </h2>
+        <p class="text-gray-300">Ask anything about this plant below!</p>
+      </div>
+
+      <!-- Uploaded Plant Image -->
+      <div id="identifiedImage" class="text-center mb-6">
+        <img 
+          src="{{ url_for('static', filename='uploads/' + image_path) }}" 
+          alt="Identified Plant Image" 
+          class="mx-auto rounded-lg shadow-lg w-64 h-64 object-cover"
+        >
+      </div>
+      <!-- Chatbot UI -->
+      <div class="bg-gray-800 p-4 rounded-lg shadow-md">
+        <div id="chatbox" class="h-64 overflow-y-auto bg-gray-700 p-4 rounded text-base space-y-4">
+          <p class="text-gray-300">Chatbot: Hello! How can I help you?</p>
+        </div>
+        <div class="mt-4 flex">
+          <input 
+            id="userInput" 
+            type="text" 
+            placeholder="Type your question..." 
+            class="flex-grow p-2 rounded-l bg-gray-600 text-white focus:outline-none">
+          <button 
+            onclick="sendMessage()" 
+            class="bg-blue-500 text-white px-4 py-2 rounded-r hover:bg-blue-600">
+            Send
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- JavaScript -->
+  <script>
+    function appendMessage(sender, text) {
+      const chatbox = document.getElementById("chatbox");
+      const message = document.createElement("div");
+      message.className = "mb-2";
+      message.innerHTML = `<strong>${sender}:</strong> ${text}`;
+      chatbox.appendChild(message);
+      chatbox.scrollTop = chatbox.scrollHeight;
+    }
+    async function sendMessage() {
+      const input = document.getElementById("userInput");
+      const msg = input.value.trim();
+      if (!msg) return;
+      appendMessage("You", msg);
+
+      const response = await fetch("/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: msg }),
+      });
+
+      const data = await response.json();
+      appendMessage("Chatbot", data.reply);
+      input.value = "";
+    }
+  </script>
+</body>
+</html>
